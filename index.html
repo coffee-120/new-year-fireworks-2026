@@ -490,16 +490,10 @@
             this._fadeAudioVolume(a, clamp(this._mix.bgm, 0, 1), 380, null);
             bgm.pausedByInterruption = false;
           },
-
-          // 参数选项: { pitch, volume, delay(ms), duration(s), force(bool) }
-          // 辅助函数: 解析SRT字幕格式
-          // 示例格式:
-          // 1
           // 00:00:01,000 --> 00:00:04,000
-          // 你好世界
           parseSRT(srtContent) {
              const items = [];
-             // 修复: 处理CRLF和LF换行符
+             // 处理CRLF和LF换行符
              const safe = String(srtContent || "").replace(/^\uFEFF/, "");
              const blocks = safe.trim().replace(/\r\n/g, '\n').split(/\n\s*\n/);
              blocks.forEach(block => {
@@ -613,15 +607,6 @@
                      // 持续时间结束后自动隐藏
                      const hideTimer = setTimeout(() => {
                          // 仅当内容未改变时隐藏（简单检查）
-                         // 实际上，下一个字幕会覆盖，所以只需检查时间或让它持续到下一个？
-                         // 最好在没有立即下一个字幕时清除。
-                         // 为简单起见，只需设置透明度或清空内容。
-                         // 但如果清除，可能会清除重叠的下一个字幕。
-                         // 我们依赖定时器已安排的事实。
-                         // 但我们应该在持续时间过后隐藏。
-                         // 为防止竞争条件，可以检查内容是否仍然是我们的。
-                         // 简化：仅在持续时间过后隐藏。
-                         // 如果下一个字幕开始，它会取消隐藏并设置新内容。
                          if (subContainer.innerHTML.includes(htmlText)) {
                             subContainer.style.display = 'none';
                          }
@@ -1138,7 +1123,7 @@
           const visibleH = 14.0; 
           const visibleW = visibleH * aspect;
           
-          // 1. Divide visible window into 8 parts (4 columns x 2 rows)
+          // Divide visible window into 8 parts (4 columns x 2 rows)
           const cols = 4;
           const rows = 2;
           const cellW = visibleW / cols;
@@ -1365,8 +1350,8 @@
                 let targetX, targetY, targetZ;
                 
                 if (rb) {
-                  // Map tx, ty, tz (-2..2 approx) to region bounds
-                  // Normalize t to 0..1
+                  // 将tx, ty, tz (-2..2近似值) 映射到区域边界
+                  // 将t归一化到0..1范围
                   const nx = (tx / 2.5 + 1) * 0.5;
                   const ny = (ty / 2.5 + 1) * 0.5;
                   const nz = (tz / 2.5 + 1) * 0.5;
@@ -1375,22 +1360,22 @@
                   targetY = lerp(rb.minY + r, rb.maxY - r, clamp(ny, 0, 1));
                   targetZ = lerp(rb.minZ, rb.maxZ, clamp(nz, 0, 1));
                 } else {
-                  // Fallback to global bounds
+                  // 回退到全局边界
                   targetX = (tx / 2.0) * (rightX - r);
                   targetY = bottomY + r + 0.5 + (0.5 + ty / 2.0) * (topY - bottomY - r * 2 - 1.0);
                   targetZ = (tz / 1.8) * (boundsNormal.z - r);
                 }
                 
                 tmp.set(targetX - p.x, targetY - p.y, targetZ - p.z);
-                // Stronger attraction to keep them in bounds
+                // 增强吸引力以保持词汇在边界内
                 v.addScaledVector(tmp, h * 0.25 * normalSpeedMul);
                 
-                // Increase collision radius and force for more uniform distribution
+                // 增加碰撞半径和力度以实现更均匀的分布
                 if (doCollide) {
-                  // Uniform Distribution Logic: Add repulsive force from other words regardless of close proximity
-                  // Iterate through a few random neighbors to push away if too close
-                  // Actually, the collision loop below handles 'collision'. 
-                  // Here we add some random jitter to help escape local minima.
+                  // 均匀分布逻辑：无论距离远近都添加来自其他词汇的排斥力
+                  // 遍历一些随机邻居以在太近时推开
+                  // 实际上，下方的碰撞循环处理'碰撞'
+                  // 这里添加一些随机抖动以帮助逃离局部最小值
                   v.x += rand(-0.85, 0.85) * h * 0.35 * normalSpeedMul;
                   v.y += rand(-0.75, 0.75) * h * 0.35 * normalSpeedMul;
                   v.z += rand(-0.6, 0.6) * h * 0.35 * normalSpeedMul;
@@ -1455,13 +1440,13 @@
                     const dy = a.position.y - b.position.y;
                     const dz = a.position.z - b.position.z;
                     const dist2 = dx * dx + dy * dy + dz * dz;
-                    // Increase collision radius multiplier to spread them out more (was ra+rb)
+                    // 增加碰撞半径乘数以使它们更分散（原来是ra+rb）
                     const r = (ra + rb) * 1.5; 
                     if (dist2 >= r * r) continue;
                     const dist = Math.sqrt(Math.max(1e-6, dist2));
                     nrm.set(dx / dist, dy / dist, dz / dist);
                     const penetration = r - dist;
-                    // Stiffer response
+                    // 更硬的响应
                     const corr = penetration * 0.85; 
                     a.position.addScaledVector(nrm, corr * 0.5);
                     b.position.addScaledVector(nrm, -corr * 0.5);
@@ -1694,7 +1679,7 @@
             this.iDelay = new Float32Array(this.max);
             this.iGroup = new Float32Array(this.max);
             
-            // Optimization: Free List Stack
+            // 优化：空闲列表栈
             this.freeStack = new Int32Array(this.max);
             this.freeCount = 0;
 
@@ -1757,20 +1742,20 @@
             this.prevPos[base + 2] = pz;
             this.trailAcc[idx] = 0;
             
-            // Push to free stack
+            // 推入空闲栈
             this.freeStack[this.freeCount++] = idx;
           }
 
           spawnParticle(p, v, color, life, kind) {
             let idx = -1;
             
-            // Try pop from free stack first (O(1))
+            // 优先从空闲栈弹出（O(1)复杂度）
             if (this.freeCount > 0) {
                 idx = this.freeStack[--this.freeCount];
             } else if (this.count < this.max) {
                 idx = this.count++;
             } else {
-              // Pool is full, force recycle
+              // 对象池已满，强制回收
               // 保护策略：绝对禁止回收 kind=4 (Emitter) 和 kind=0 (Rocket) 的粒子
               // 尝试随机找 30 次
               for(let t=0; t<30; t++) {
@@ -1886,8 +1871,7 @@
               if (k === 4) {
               } else if (k === 6) {
               } else if (k === 7) {
-                  // 二次爆炸粒子下落速度减缓50%
-                  // 正常重力是 g * effectiveDt * 7.8
+                  
                   vx *= dragExplosionXZ;
                   vz *= dragExplosionXZ;
                   
@@ -1895,7 +1879,7 @@
                       vy = vy - g * effectiveDt * 1.5;
                       vy *= dragExplosionAscentY;
                   } else {
-                      // 再次减缓40%的下落重力 (3.9 * 0.6 = 2.34)
+                      
                       vy = vy - g * effectiveDt * 2.34;
                   }
               } else if (k === 1 || k === 3) {
@@ -1994,20 +1978,14 @@
                   const curSpeed = dl * invDt;
                   _c.fromArray(this.col, i * 4);
                   
-                  // 生命周期微调：不同类型的尾迹长度略有不同
-                  // 螺旋上升(tag=41)加长60% (1.35 -> 2.16)
-                  // tag=46 (冠状小火箭) 加长到 2.2s (原3.0s) 以优化性能
-                  // 水帘(tag=43) 尾迹变长 (1.15 -> 2.5)
+                 
                   const segLife = segFromEmitter 
                     ? (tag === 44 ? 1.45 : tag === 41 ? 2.16 : tag === 46 ? 2.2 : tag === 42 ? 1.35 : tag === 43 ? 4.2 : 1.85) 
                     : segFromRocket ? clamp(7.2 / Math.max(2.0, curSpeed), 0.35, 6.0) : 0.75;
                   
                   // 核心优化：动态计算插值数量
                   // 统一高密度：所有尾迹默认 dl / 0.005
-                  // 特殊优化：超长尾迹(双火箭42/44、螺旋41、水帘源43)密度再翻倍 dl / 0.0025，确保绝对丝滑
-                  // 注意：移除了 tag=46 (冠状小火箭) 的超高密度，降级为普通高密度(0.005)，以解决第四支烟花卡顿问题
-                  // 第一束烟花(segFromSpark)密度再翻倍 dl / 0.0025
-                  // 螺旋上升(tag=41)插值密度再翻一番 -> dl / 0.00125
+                  
                   let densityDiv = 0.005;
                   if (tag === 42 || tag === 44 || tag === 43 || segFromSpark) densityDiv = 0.0025;
                   if (tag === 41) densityDiv = 0.00125;
@@ -2076,9 +2054,9 @@
                   : k === 2
                   ? CONFIG.visuals.trails.sparkLength
                   : k === 3
-                  ? 0.48 // Giant explosion: 4 particle sizes
+                  ? 0.48 
                   : k === 7
-                  ? 0.42 // Secondary: slightly shorter than parent (0.48) but slender
+                  ? 0.42 
                   : CONFIG.visuals.trails.explosionLength;
               let lenScale = clamp(speed * 0.14, 0.65, 2.4);
               if (k === 0 || k === 5) lenScale = 0.72;
@@ -2093,7 +2071,7 @@
                     ? CONFIG.visuals.trails.rocketLength * 0.14
                     : CONFIG.visuals.trails.rocketLength * 0.16
                   : trailBase * lenScale;
-              if (k === 5) len *= a; // Shrink length as it fades
+              if (k === 5) len *= a; 
               if ((useSegmentTrails && (k === 0 || k === 2)) || (k === 0 && this.iGroup[i] === 45)) len = 0.12;
               if (k === 4) len = 0;
               if (k !== 6 && k !== 5) {
@@ -2119,7 +2097,7 @@
                 (k === 0
                   ? 0.88
                   : k === 5
-                  ? this.iDelay[i] // Use stored base alpha for smooth fade
+                  ? this.iDelay[i] // 使用存储的基础透明度值实现平滑淡入淡出
                   : k === 4
                   ? 0.0
                   : k === 2
@@ -2141,7 +2119,7 @@
                   : k === 2
                   ? w0 * 0.96
                   : k === 7
-                  ? CONFIG.visuals.trails.widthExplosion * 0.95 // Match explosion width (thick) instead of thin
+                  ? CONFIG.visuals.trails.widthExplosion * 0.95 
                   : k === 6
                   ? this.iGroup[i] === 44
                     ? w0 * 2.6
@@ -2198,7 +2176,7 @@
           idx: -1,
           t: 0,
           duration: 1.6,
-          // 第一束烟花位置上调: y=4.0 (2.0 + 1/4 countdown height)
+          
           apex: new THREE.Vector3(0, 4.0, 0),
         };
 
@@ -2285,10 +2263,9 @@
         function setCountdownDigit(d) {
           if (countdown.current) countdown.group.remove(countdown.current);
           countdown.current = createDigitMesh(d);
-          // 每次旋转重置角度减少10度 (0.175弧度)
+          
           const baseRy = 0.55 - (3 - d) * 0.175;
-          // "1"为轴即Y轴。顺时针旋转15度即-0.26弧度。
-          // baseRy在d=3时为0.55。要得到-0.26，需要减去0.81
+          
           countdown.current.rotation.set(0.14, baseRy - 0.81, 0);
           countdown.current.traverse((o) => {
             if (o && o.isMesh) o.renderOrder = 50;
@@ -2323,22 +2300,18 @@
           if (!text) return;
           
           const opt = Object.assign({
-              color: "#00ffff", // Tech Cyan
+              color: "#00ffff", // 科技青色
               shadow: "#008B8B",
-              stroke: "rgba(0,0,0,0)", // No black stroke
+              stroke: "rgba(0,0,0,0)", // 无黑色描边
               fontSize: 120,
               fontFamily: '"Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
               scale: 1.0
            }, options || {});
            
            const sprite = createTextSprite(text, opt);
-           // Position at countdown location: 0, 3.8, 4.8
+           // 设置在倒计时位置
            sprite.position.set(0, 3.8, 4.8);
-           // Scale calculation: 
-           // createTextSprite scales to (w/240, h/240). 
-           // If fontSize=120, h~160. 160/240 = 0.66.
-           // Target height ~2.5 (Countdown size). 2.5 / 0.66 = 3.8.
-           // Let's use scale multiplier 4.0.
+           // 缩放计算：目标高度约2.5，使用4.0倍缩放
            const baseScale = opt.scale || 1.0;
            sprite.scale.multiplyScalar(4.0 * baseScale);
            
